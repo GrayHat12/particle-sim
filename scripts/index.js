@@ -1,3 +1,36 @@
+/**
+ * @template T
+ * @param {string} key 
+ * @param {T} def 
+ * @param {(string, T) => T} parserValidator
+ */
+function getQueryParam(key, def, parserValidator) {
+    const urlParams = new URLSearchParams(window.location.search);
+    let param = urlParams.get(key);
+    if (param == null) {
+        return def;
+    }
+    return parserValidator(param, def);
+}
+
+/**
+ * 
+ * @param {string} value 
+ * @param {number} num 
+ */
+function parserValidatorInt(value, num) {
+    let val = parseInt(value, 10);
+    if (isNaN(val) || !isFinite(val)) {
+        return num;
+    }
+    return val;
+}
+
+const CONFIG = Object.freeze({
+    FPS: getQueryParam("fps", 90, parserValidatorInt),
+    PROTONS: getQueryParam("protons", 128, parserValidatorInt)
+});
+
 const PIXEL_PER_FEMT = 1 / 0.8;
 const TIME_SCALE = 1e-2;
 const FORCE_SCALE = 1e45;
@@ -677,9 +710,9 @@ function preload() {
 
 function setup() {
     createCanvas(windowWidth, windowHeight);
-    frameRate(90);
+    frameRate(CONFIG.FPS);
     background("#323232");
-    let protonCount = 256;
+    let protonCount = CONFIG.PROTONS;
     let neutronCount = protonCount * 1;
     let electronCount = neutronCount * 2;
     for (let i = 0; i < protonCount; i++) {
